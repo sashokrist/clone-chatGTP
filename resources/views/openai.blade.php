@@ -18,7 +18,7 @@
             overflow-y: auto;
         }
         .response {
-            background-color: #f2f2f2; /* Light grey background */
+            background-color: #d4edda; /* Light grey background */
             padding: 10px;
             margin: 5px 0;
             border-radius: 5px;
@@ -29,12 +29,14 @@
 
 <body>
 <div class="container mt-5">
-    <h1 class="text-center">SASHO AI Chat</h1>
-    <div id="chat" class="chat-box"></div>
-    <div class="form-group">
-        <textarea id="userInput" cols="5" rows="5"  class="form-control" placeholder="Ask AI"></textarea>
+    <h1 class="text-center mb-4">OpenAI Chat</h1>
+    <div class="card">
+        <div class="card-body">
+            <div id="chat" class="chat-box mt-3"></div>
+            <textarea id="userInput" class="form-control mb-3" rows="3" placeholder="Type your message here..."></textarea>
+            <button onclick="sendMessage()" class="btn btn-primary">Send</button>
+        </div>
     </div>
-    <button onclick="sendMessage()" class="btn btn-primary">Send</button>
 </div>
 
 <script>
@@ -58,7 +60,11 @@
             const assistantResponse = data.choices[0].message.content;
             const formattedResponse = formatResponse(assistantResponse);
 
-            chatDiv.innerHTML += `<div class="response">${formattedResponse}</div>`;
+            chatDiv.innerHTML += `<div class="card mb-3">
+                                <div class="card-body">
+                                    ${formattedResponse}
+                                </div>
+                              </div>`;
             chatDiv.scrollTop = chatDiv.scrollHeight; // Scroll to the bottom of the chat box
         }
     }
