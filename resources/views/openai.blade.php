@@ -7,87 +7,160 @@
     <!-- Include Bootstrap CSS -->
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <style>
+        h1, h2, h3, h4, h5, h6 {
+            font-weight: bold;
+            color: white;
+        }
+        .container {
+            max-width: 100%;
+            background: #343541;
+            margin: auto;
+            padding: 20px;
+        }
         .chat-box {
             border: 1px solid #ddd;
             padding: 20px;
             margin-bottom: 20px;
-            background-color: #f8f9fa;
-            color: #343a40;
+            background-color: #343541;
+            color: white;
             font-size: 18px;
             height: 300px;
             overflow-y: auto;
         }
+        .card-custom {
+            background: #343541;
+        }
         .response {
-            background-color: #d4edda; /* Light grey background */
+            background-color: black;
             padding: 10px;
             margin: 5px 0;
             border-radius: 5px;
         }
 
+        .sidebar {
+            border: 1px solid #ddd;
+            background-color: black;
+            height: 200px;
+            width: 100%;
+            overflow-y: auto;
+        }
+        button {
+            background-color: #343541;
+            color: white;
+            border: 1px solid white;
+        }
+          button:hover {
+                background-color: #343541;
+                color: white;
+                border: 1px solid white;
+            }
     </style>
 </head>
 
 <body>
-<div class="container mt-5">
-    <h1 class="text-center mb-4">OpenAI Chat</h1>
-    <div class="card">
-        <div class="card-body">
-            <div id="chat" class="chat-box mt-3"></div>
-            <textarea id="userInput" class="form-control mb-3" rows="3" placeholder="Type your message here..."></textarea>
-            <button onclick="sendMessage()" class="btn btn-primary">Send</button>
+<div class="container">
+    <h1 class="text-center mb-4">
+        <svg width="64px" height="64px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#ffffff"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M11 6C13.7614 6 16 8.23858 16 11M16.6588 16.6549L21 21M19 11C19 15.4183 15.4183 19 11 19C6.58172 19 3 15.4183 3 11C3 6.58172 6.58172 3 11 3C15.4183 3 19 6.58172 19 11Z" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </g></svg>
+        Ask Sasho, he knows
+        <svg width="64px" height="64px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#ffffff"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M11 6C13.7614 6 16 8.23858 16 11M16.6588 16.6549L21 21M19 11C19 15.4183 15.4183 19 11 19C6.58172 19 3 15.4183 3 11C3 6.58172 6.58172 3 11 3C15.4183 3 19 6.58172 19 11Z" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </g></svg>    </h1>
+    <div class="container mt-5">
+        <div class="row">
+            <!-- Left Sidebar for History -->
+            <div class="col-md-3 sidebar mt-3">
+                <div class="history-sidebar">
+                    <h4 class="text-center">History</h4>
+                    <ul id="historyList" class="list-unstyled">
+                        <!-- History items will be added here -->
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Main Chat Area -->
+            <div class="col-md-9">
+                <div class="card card-custom">
+                    <div class="card-body">
+                        <div id="chat" class="chat-box"></div>
+                        <textarea id="userInput" class="form-control mb-3" rows="3" placeholder="Ask Sasho..." style="background: #343541; color: white"></textarea>
+                        <button onclick="sendMessage()" class="btn btn-info w-100">
+                       ASK
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
+        <footer class="text-center mt-4">
+            <h6>All rights reserved SASHO_DEV 2023</h6>
+        </footer>
     </div>
 </div>
 
 <script>
-    async function sendMessage() {
-        const input = document.getElementById('userInput').value;
-        const response = await fetch('/openai/completion', {
+    function sendMessage() {
+        const userInputField = document.getElementById('userInput');
+        const userMessage = userInputField.value;
+
+        fetch('/openai/completion', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'X-CSRF-TOKEN': '{{ csrf_token() }}'
             },
-            body: JSON.stringify({ messages: [{ role: 'user', content: input }] })
-        });
-        const data = await response.json();
-        displayResponse(data);
+            body: JSON.stringify({ messages: [{ role: 'user', content: userMessage }] })
+        })
+            .then(response => response.json())
+            .then(data => displayResponse(data))
+            .catch(error => console.error('Error:', error));
     }
+
 
     function displayResponse(data) {
         const chatDiv = document.getElementById('chat');
+        const userInputField = document.getElementById('userInput');
+        const userMessage = userInputField.value;
         if (data.choices && data.choices.length > 0) {
-            const assistantResponse = data.choices[0].message.content;
-            const formattedResponse = formatResponse(assistantResponse);
-
-            chatDiv.innerHTML += `<div class="card mb-3">
-                                <div class="card-body">
-                                    ${formattedResponse}
-                                </div>
+            const aiResponse = data.choices[0].message.content;
+            chatDiv.innerHTML += `<div class="response p-3 mb-2">
+                                <strong>You:</strong> ${userMessage}<br>
+                                <strong>AI:</strong> ${aiResponse}
                               </div>`;
             chatDiv.scrollTop = chatDiv.scrollHeight; // Scroll to the bottom of the chat box
+            document.getElementById('userInput').value = '';
         }
     }
 
     function formatResponse(response) {
-        // Split response into sentences
-        const sentences = response.match(/[^\.!\?]+[\.!\?]+/g) || [response];
+        // Check for programming code
+        if (response.trim().startsWith('```') && response.trim().endsWith('```')) {
+            const code = response.trim().slice(3, -3);
+            return `<pre><code>${escapeHtml(code)}</code></pre>`;
+        }
+
+        // Check for numbered lists
+        if (response.match(/^\d+\..+/gm)) {
+            const listItems = response.split(/\n/).filter(item => item.match(/^\d+\..+/)).map(item => `<li>${item.trim().substring(item.indexOf('.') + 1).trim()}</li>`).join('');
+            return `<ol>${listItems}</ol>`;
+        }
+
+        // Split response into sentences for other cases
+        const sentences = response.split(/\n/).filter(line => !line.match(/^\d+\..+/));
 
         return sentences.map(sentence => {
-            // Check for lists, links, and programming code
-            if (sentence.includes('- ')) { // Simple check for lists
-                const items = sentence.split('- ').filter(item => item).map(item => `<li>${item.trim()}</li>`).join('');
-                return `<ul>${items}</ul>`;
-            } else if (sentence.includes('http://') || sentence.includes('https://')) { // Simple check for links
+            if (sentence.includes('http://') || sentence.includes('https://')) { // Simple check for links
                 const link = sentence.match(/(https?:\/\/[^\s]+)/g)[0];
                 return sentence.replace(link, `<a href="${link}" target="_blank">${link}</a>`);
-            } else if (sentence.startsWith('```') && sentence.endsWith('```')) { // Simple check for code
-                const code = sentence.slice(3, -3).trim();
-                return `<p style="font-family: monospace; font-weight: bold;">${code}</p>`;
             } else {
                 return `<p>${sentence.trim()}</p>`;
             }
         }).join('');
+    }
+
+    function escapeHtml(unsafe) {
+        return unsafe
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
     }
 
 </script>
