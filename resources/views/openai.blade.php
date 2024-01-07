@@ -40,7 +40,6 @@
         .sidebar {
             border: 1px solid #ddd;
             background-color: black;
-            height: 200px;
             width: 100%;
             overflow-y: auto;
         }
@@ -69,8 +68,14 @@
             <div class="col-md-3 sidebar mt-3">
                 <div class="history-sidebar">
                     <h4 class="text-center">History</h4>
-                    <ul id="historyList" class="list-unstyled">
-                        <!-- History items will be added here -->
+                    <ul id="historyList" class="list-unstyled text-white">
+                        @foreach ($sessions as $session)
+                            <li>
+                                <p><strong>Messages:</strong> {{ $session->messages }}</p>
+                                <p><strong>Created At:</strong> {{ $session->created_at }}</p>
+                                <hr style="border-top: 1px solid white;">
+                            </li>
+                        @endforeach
                     </ul>
                 </div>
             </div>
@@ -81,7 +86,7 @@
                     <div class="card-body">
                         <div id="chat" class="chat-box"></div>
                         <textarea id="userInput" class="form-control mb-3" rows="3" placeholder="Ask Sasho..." style="background: #343541; color: white"></textarea>
-                        <button onclick="sendMessage()" class="btn btn-info w-100">
+                        <button id="askButton" onclick="sendMessage()" class="btn btn-info w-100">
                        ASK
                         </button>
                     </div>
@@ -99,6 +104,8 @@
         const userInputField = document.getElementById('userInput');
         const userMessage = userInputField.value;
 
+        document.getElementById('askButton').innerText = 'Please wait...';
+
         fetch('/openai/completion', {
             method: 'POST',
             headers: {
@@ -108,8 +115,14 @@
             body: JSON.stringify({ messages: [{ role: 'user', content: userMessage }] })
         })
             .then(response => response.json())
-            .then(data => displayResponse(data))
-            .catch(error => console.error('Error:', error));
+            .then(data => {
+                displayResponse(data);
+                document.getElementById('askButton').innerText = 'ASK';
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('askButton').innerText = 'ASK';
+            });
     }
 
 

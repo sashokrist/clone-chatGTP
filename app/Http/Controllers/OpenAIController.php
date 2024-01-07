@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Session;
 use App\Services\OpenAIService;
 use Illuminate\Http\Request;
 
@@ -16,13 +17,16 @@ class OpenAIController extends Controller
 
     public function index()
     {
-        return view('openai');
+        $sessions = Session::all();
+        return view('openai', compact('sessions'));
     }
 
     public function getCompletion(Request $request)
     {
         $messages = $request->input('messages', []);
         $completion = $this->openaiService->getCompletion($messages);
+
+        Session::create(['messages' => json_encode($messages)]);
 
         return response()->json($completion);
     }
